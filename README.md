@@ -85,6 +85,11 @@ class YourNotification extends Notification
     public function toFcm($notifiable)
     {
         return [
+            'notification' => [
+                'title' => 'Notification Title',
+                'body' => 'Notification body text.',
+                'icon' => 'https://your-server.example/icon.png',
+            ],
             'webpush' => [
                 'notification' => [
                     'title' => 'Notification Title',
