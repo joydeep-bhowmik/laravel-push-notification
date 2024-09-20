@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Notifications;
+namespace JoydeepBhowmik\LaravelPushNotification\Channels;
 
 use App\Models\UserDevice;
 use Exception;

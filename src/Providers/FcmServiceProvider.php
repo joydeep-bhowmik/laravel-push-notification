@@ -1,6 +1,6 @@
 <?php
 
-namespace YourVendorName\Fcm;
+namespace JoydeepBhowmik\LaravelPushNotification\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -24,7 +24,7 @@ class FcmServiceProvider extends ServiceProvider
 
 
         $this->publishes([
-            __DIR__ . '/UserDevice.php' => app_path('Models/UserDevice.php')
+            __DIR__ . '/Models/UserDevice.php' => app_path('Models/UserDevice.php')
         ], 'fcm-tokens-model');
     }
 
