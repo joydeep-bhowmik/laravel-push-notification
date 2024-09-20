@@ -1,0 +1,30 @@
+{
+  "name": "joydeep-bhowmik/laravel-push-notification",
+  "description": "A Laravel package for integrating Firebase Cloud Messaging (FCM) to handle push notifications.",
+  "type": "library",
+  "version": "v1.0.0",
+  "license": "MIT",
+  "keywords": [
+    "laravel",
+    "fireabse push notification",
+    "push notification"
+  ],
+  "require": {
+    "laravel/framework": "^11.9",
+    "kreait/firebase-php": "^6.0",
+    "livewire/volt": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "JoydeepBhowmik\\LaravelPushNotification\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "joydeep-bhowmik",
+      "email": "bhowmikj9432@gmail.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
