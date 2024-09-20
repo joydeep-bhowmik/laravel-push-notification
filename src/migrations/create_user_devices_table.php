@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('user_devices', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
             $table->string('token');
             $table->boolean('notificable')->default(true);
             $table->foreign('user_id')

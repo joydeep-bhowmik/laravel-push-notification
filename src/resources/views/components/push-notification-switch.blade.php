@@ -26,7 +26,7 @@ $turnOnNotification = function (string $token, string $os) {
 
     $device->device = $os;
 
-    $device->user_id = auth()->user()->id;
+    $device->user_id = auth()->user()?->id;
 
     $device->notificable = true;
 
