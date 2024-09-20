@@ -85,6 +85,7 @@ class YourNotification extends Notification
     public function toFcm($notifiable)
     {
         return [
+            // 'topic'=>'topic-name', if you want to send message in a topic
             'notification' => [
                 'title' => 'Notification Title',
                 'body' => 'Notification body text.',

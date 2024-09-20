@@ -5,8 +5,6 @@ namespace JoydeepBhowmik\LaravelPushNotification\Channels;
 use App\Models\UserDevice;
 use Exception;
 use Kreait\Firebase\Factory;
-use function Laravel\Prompts\error;
-use Illuminate\Support\Facades\Http;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FcmNotification;
 use Illuminate\Notifications\Notification;
@@ -35,14 +33,20 @@ class FcmChannel
     {
         $data = (object) $notification->toFcm($notifiable);
 
-        $deviceTokens = $notifiable->getFcmDeviceTokens();
+        $deviceTokens = isset($data->topic) ? null : $notifiable->getFcmDeviceTokens();
 
         $factory = (new Factory)
             ->withServiceAccount($this->firebase_credentials_path);
 
         $messaging = $factory->createMessaging();
 
-        $message = CloudMessage::new()->withNotification(FcmNotification::fromArray($data->notification));
+        $message = CloudMessage::new();
+
+        if (isset($data->topic)) {
+            $message = CloudMessage::withTarget('topic', $topic);
+        }
+
+        $message = $message->withNotification(FcmNotification::fromArray($data->notification));
 
         if (isset($data->webpush) && is_array($data->webpush)) {
 
