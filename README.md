@@ -1,4 +1,4 @@
-# Laravel Push Notification
+# Laravel Push Notification (this package is currently under development)
 
 A Laravel package for integrating Firebase Cloud Messaging (FCM) to handle push notifications seamlessly.
 
