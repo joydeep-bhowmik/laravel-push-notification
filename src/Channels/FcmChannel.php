@@ -42,7 +42,7 @@ class FcmChannel
 
         $messaging = $factory->createMessaging();
 
-        $message = CloudMessage::new();
+        $message = CloudMessage::new()->withNotification(FcmNotification::fromArray($data->notification));
 
         if (isset($data->topic)) {
             $message = CloudMessage::withTarget('topic', $topic);
@@ -65,7 +65,8 @@ class FcmChannel
             $message = $message->withApnsConfig(ApnsConfig::fromArray($data->apns));
         }
 
-        $report = $messaging->sendMulticast($message, $deviceTokens);
+
+        $report = isset($data->topic) ?  $messaging->send($message) : $messaging->sendMulticast($message, $deviceTokens);
 
         $invalidTargets = $report->invalidTokens();
 

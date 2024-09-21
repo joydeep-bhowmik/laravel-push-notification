@@ -24,6 +24,16 @@ To install the package, use Composer:
 composer require joydeep-bhowmik/laravel-push-notification
 ```
 
+And add this in your `bootstrap/providers`
+
+```php
+<?php
+return [
+   JoydeepBhowmik\LaravelPushNotification\Providers\FcmServiceProvider::class
+];
+
+```
+
 ## Publishing Assets
 
 After installation, publish the package assets using the following command:
@@ -48,6 +58,8 @@ This command will publish the following resources:
 After publishing, configure the FCM settings in `config/fcm.php`. Ensure you set the correct Firebase credentials and other options as needed.
 
 Make sure to set the `FIREBASE_CREDENTIALS` in your `.env` file.
+
+and replace api keys in `public/firebase-messaging-sw.js`,`resources/js/fcm.js`,`storage/framework/app/firebase-auth.js`.
 
 ## Migrations
 

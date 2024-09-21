@@ -16,7 +16,8 @@
   },
   "autoload": {
     "psr-4": {
-      "JoydeepBhowmik\\LaravelPushNotification\\": "src/"
+      "JoydeepBhowmik\\LaravelPushNotification\\": "src/",
+      "JoydeepBhowmik\\LaravelPushNotification\\Tests\\": "tests"
     }
   },
   "authors": [
@@ -26,5 +27,15 @@
     }
   ],
   "minimum-stability": "stable",
-  "prefer-stable": true
+  "prefer-stable": true,
+  "require-dev": {
+    "orchestra/testbench": "^9.4",
+    "pestphp/pest": "^3.1",
+    "pestphp/pest-plugin-laravel": "^3.0"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
 }
