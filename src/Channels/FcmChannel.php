@@ -18,7 +18,9 @@ class FcmChannel
 
     public function __construct()
     {
-        $this->firebase_credentials_path = (config('fmc.firebase_credentials') && trim(config('fmc.firebase_credentials')) == 'auto' ? 'app/firebase-auth.js' : null) ? storage_path(config('fmc.firebase_credentials')) : null;
+        $this->firebase_credentials_path =  config('fcm.firebase_credentials') && trim(config('fcm.firebase_credentials')) == 'auto' ? 'app/firebase-auth.js' : config('fcm.firebase_credentials');
+
+        $this->firebase_credentials_path = storage_path($this->firebase_credentials_path);
 
         // dd($this->firebase_credentials_path);
 
@@ -60,7 +62,7 @@ class FcmChannel
 
         if (isset($data->apns) && is_array($data->apns)) {
 
-            $message = $message->withApnsConfig(ApnsConfig::fromArray($data->apns()));
+            $message = $message->withApnsConfig(ApnsConfig::fromArray($data->apns));
         }
 
         $report = $messaging->sendMulticast($message, $deviceTokens);

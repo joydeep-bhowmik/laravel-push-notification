@@ -3,13 +3,23 @@
 namespace JoydeepBhowmik\LaravelPushNotification\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class FcmServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+
+        Route::middleware('api')->prefix('api')->group(function () {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/api.php');
+        });
+
+        Route::middleware('web')->prefix('fcm')->group(function () {
+            $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
+        });
+
         // Load migrations
-        $this->loadMigrationsFrom(__DIR__ . '/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 
         // Publish all resources under one tag
         $this->publishes([

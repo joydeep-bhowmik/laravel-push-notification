@@ -1,93 +1,124 @@
-<?php
-use App\Models\UserDevice;
-use function Livewire\Volt\{state, on, mount};
-
-state(['push_notification' => false]);
-
-$checkIfNotificationOn = function (string $token = null) {
-    $device = UserDevice::where('token', $token)->first();
-
-    if (!$device) {
-        return;
-    }
-
-    if ($device && $device->notificable) {
-        return $this->dispatch('notification-status-updated', allowed: true);
-    }
-};
-
-$turnOnNotification = function (string $token, string $os) {
-    $device = UserDevice::where('token', $token)->first();
-
-    if (!$device) {
-        $device = new UserDevice();
-        $device->token = $token;
-    }
-
-    $device->device = $os;
-
-    $device->user_id = auth()->user()?->id;
-
-    $device->notificable = true;
-
-    $device->save() && $this->dispatch('notification-status-updated', allowed: true);
-};
-
-$turnOffNotification = function (string $token) {
-    $device = UserDevice::where('token', $token)->first();
-
-    $device->notificable = false;
-
-    $device->save() && $this->dispatch('notification-status-updated', allowed: false);
-};
-
-?>
-
-<div {{ $attributes }}>
-    @volt('push-notification-switch-volt')
-        <div wire:loading.class='disabled' x-data="{
-            push_notification: Notification.permission === 'granted' && $wire.push_notification,
-            token: null,
-            os: null,
-            init() {
-        
-                if (Notification.permission === 'granted') {
-        
-                    $store.fcm.getPermission((data) => {
-                        const { os, token } = data;
-                        this.token = token;
-                        this.os = os;
-                        $wire.checkIfNotificationOn(token);
-                    });
-                }
-                $watch('push_notification', (value) => {
-                    if (value) {
-                        if (Notification.permission !== 'granted') {
-                            $store.fcm.getPermission((data) => {});
-                        }
-                        return $wire.turnOnNotification(this.token, this.os)
-                    };
-                    return $wire.turnOffNotification(this.token);
-                });
-            },
-        
-            resetStatus(e) {
-                const { allowed } = e.detail;
-                this.push_notification = allowed;
+@props(['label' => 'allowed Notification', 'id' => 'toggle' . uniqid()])
+<label
+    {{ $attributes->merge([
+        'class' => 'relative inline-flex cursor-pointer items-center',
+        'for' => $id,
+    ]) }}
+    x-data="{
+        push_notification: $persist(false),
+        token: null,
+        isLoading: false,
+        init() {
+            this.checkNotificationStatus();
+    
+        },
+        async toggleNotification($el) {
+    
+            console.log($el.checked);
+    
+            if ($el.checked) {
+                return await this.enableNotification();
+            } else {
+                return await this.disableNotification();
             }
-        
-        }" wire:loading.class='disabled'
-            @notification-status-updated="resetStatus">
-
-            <label class="inline-flex cursor-pointer items-center">
-                <input class="peer sr-only" type="checkbox" x-model='push_notification'>
-                <div
-                    class="peer relative h-6 w-11 rounded-full bg-gray-200 after:absolute after:start-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-full peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rtl:peer-checked:after:-translate-x-full dark:border-gray-600 dark:bg-gray-700 dark:peer-focus:ring-blue-800">
-                </div>
-                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Allow Push Notification</span>
-            </label>
-
-        </div>
-    @endvolt
-
-</div>
+        },
+        async checkNotificationStatus() {
+    
+            if (this.push_notification) return;
+    
+            if (Notification.permission === 'granted') {
+                $store.fcm.getPermission(async (data) => {
+                    const { token } = data;
+                    this.token = token;
+                    try {
+                        this.isLoading = true;
+                        const response = await fetch('{{ route('fcm-notification.check') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({ token: this.token }),
+                        });
+                        const data = await response.json();
+                        console.log(data)
+                        this.push_notification = data.allowed;
+                    } catch (error) {
+                        console.error('Error checking notification status', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                })
+            }
+        },
+    
+        async enableNotification() {
+    
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                $store.fcm.getPermission(async (data) => {
+                    const { os, token } = data;
+                    this.token = token;
+                    this.os = os;
+                    try {
+                        this.isLoading = true;
+                        const response = await fetch('{{ route('fcm-notification.enable') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({ token: this.token, os: this.os }),
+                        });
+                        const data = await response.json();
+                        console.log(data)
+                        this.push_notification = data.success ? true : false;
+                    } catch (error) {
+                        console.error('Error enabling notification', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                });
+    
+            }
+        },
+    
+        async disableNotification() {
+    
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                $store.fcm.getPermission(async (data) => {
+                    const { os, token } = data;
+                    this.token = token;
+                    this.os = os;
+                    try {
+                        this.isLoading = true;
+                        const response = await fetch('{{ route('fcm-notification.disable') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            },
+                            body: JSON.stringify({ token: this.token }),
+                        });
+                        const data = await response.json();
+                        console.log(data)
+                        this.push_notification = data.success ? false : true;
+                    } catch (error) {
+                        console.error('Error disabling notification', error);
+                    } finally {
+                        this.isLoading = false;
+                    }
+                });
+    
+            }
+        },
+    }">
+    ,
+    <input class="peer sr-only" id="{{ $id }}" type="checkbox" @change='toggleNotification($el)'
+        x-model='push_notification'>
+    <div
+        class="peer h-6 w-11 rounded-full bg-gray-300 after:absolute after:left-[2px] after:top-0.5 after:h-5 after:w-5 after:rounded-full after:border after:border-gray-300 after:bg-white after:transition-all after:content-[''] peer-checked:bg-blue-600 peer-checked:after:translate-x-5 peer-checked:after:border-white peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700">
+    </div>
+    <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">{{ $label }}</span>
+</label>
